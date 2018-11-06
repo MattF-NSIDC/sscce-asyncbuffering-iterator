@@ -53,14 +53,14 @@ Python should be able to parse all 2,000 while waiting for the next 2,000.
     Buffer looks low (deque([3, 4])). Getting data (takes 1 seconds)...
       Got data: 3
       Got data: 4
-    Received [5, 6, 7, 8, 9], added to buffer: deque([3, 4, 5, 6, 7, 8, 9])
+    Received [5, 6, 7, 8, 9], added to buffer: deque([5, 6, 7, 8, 9])
       Got data: 5
       Got data: 6
       Got data: 7
     Buffer looks low (deque([8, 9])). Getting data (takes 1 seconds)...
       Got data: 8
       Got data: 9
-    Received [10, 11, 12, 13, 14], added to buffer: deque([8, 9, 10, 11, 12, 13, 14])
+    Received [10, 11, 12, 13, 14], added to buffer: deque([10, 11, 12, 13, 14])
       Got data: 10
       Got data: 11
       Got data: 12
@@ -68,4 +68,4 @@ Python should be able to parse all 2,000 while waiting for the next 2,000.
       Got data: 13
       Got data: 14
     No more pages of results available.
-    Received [], added to buffer: deque([13, 14])
+    Received [], added to buffer: deque([])
