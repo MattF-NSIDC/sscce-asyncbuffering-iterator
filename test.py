@@ -9,9 +9,11 @@ buffer_warning_level = increment // 2
 
 
 class AsyncGetData:
-    def __init__(self):
+    def __init__(self, *, loop):
         self.buffer = collections.deque([])
         self.buffer_source_depleted = False
+        self.loop = loop
+        self.task = None
 
     def __aiter__(self):
         return self
@@ -19,13 +21,18 @@ class AsyncGetData:
     async def __anext__(self):
         need_more_data = (len(self.buffer) <= buffer_warning_level
                           and not self.buffer_source_depleted)
-        data_remain = self.buffer or not self.buffer_source_depleted
+        data_remain = lambda: self.buffer or not self.buffer_source_depleted
 
-        if not data_remain:
+        if not data_remain():
             raise StopAsyncIteration
         
-        if need_more_data: 
-            await self._prefetch()
+        if need_more_data and (not self.task or self.task.done()):
+            self.task = self.loop.create_task(self._prefetch())
+
+        if not self.buffer and not self.task.done():
+            await self.task
+            if not data_remain():
+                raise StopAsyncIteration
 
         return await self._clean_data(self.buffer.popleft())
 
@@ -64,13 +71,13 @@ class AsyncGetData:
             self.buffer_source_depleted = True
 
 
-async def get_all_data():
-    get_data = AsyncGetData()
+async def get_all_data(loop):
+    get_data = AsyncGetData(loop=loop)
     async for d in get_data:
         print("  Got data: {}".format(d))
 
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(get_all_data())
+    loop.run_until_complete(get_all_data(loop))
     loop.close()
